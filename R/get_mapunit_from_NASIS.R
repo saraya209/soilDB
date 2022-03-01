@@ -12,48 +12,8 @@
 #' 
 #' @export
 get_mapunit_from_NASIS <- function(SS = TRUE, droplevels = TRUE, stringsAsFactors = default.stringsAsFactors(), dsn = NULL) {
-  
-  q.mapunit <- paste("
-                     SELECT
-                     ng.grpname, areasymbol, areatypename, liid, lmapunitiid,
-                     nationalmusym, muiid, musym, muname, mukind, mutype, mustatus, dmuinvesintens, muacres,
-                     farmlndcl, dmuiid, pct_component, pct_hydric, n_component, n_majcompflag
-
-                     FROM
-                         area            a                               INNER JOIN
-                         legend_View_1   l   ON l.areaiidref = a.areaiid INNER JOIN
-                         lmapunit_View_1 lmu ON lmu.liidref = l.liid     INNER JOIN
-                         mapunit_View_1  mu  ON mu.muiid = lmu.muiidref
-
-                    INNER JOIN
-                         areatype at  ON at.areatypeiid = areatypeiidref
-
-                    INNER JOIN
-                        nasisgroup  ng ON ng.grpiid = mu.grpiidref
-
-                    LEFT OUTER JOIN
-                    --components
-                    (SELECT
-                     cor.muiidref cor_muiidref, dmuiid, dmuinvesintens,
-                     SUM(comppct_r)                                                pct_component,
-                     SUM(comppct_r * CASE WHEN hydricrating = 1 THEN 1 ELSE 0 END) pct_hydric,
-                     COUNT(*)                                                      n_component,
-                     SUM(CASE WHEN majcompflag  = 1 THEN 1 ELSE 0 END)             n_majcompflag
-
-                     FROM
-                         component_View_1   co                                  LEFT OUTER JOIN
-                         datamapunit_View_1 dmu ON dmu.dmuiid    = co.dmuiidref LEFT OUTER JOIN
-                         correlation_View_1 cor ON cor.dmuiidref = dmu.dmuiid   AND
-                                                   cor.repdmu    = 1
-
-                     GROUP BY cor.muiidref, dmuiid, dmuinvesintens
-                    ) co ON co.cor_muiidref = mu.muiid
-
-                     WHERE
-                         areatypename IN ('Non-MLRA Soil Survey Area', 'MLRA Soil Survey Area')
-
-                     ORDER BY areasymbol, musym
-                     ;")
+ 
+ q.mapunit = soilDB:::q.lst$mapunit
   
   # toggle selected set vs. local DB
   if (SS == FALSE) {
@@ -82,18 +42,18 @@ get_mapunit_from_NASIS <- function(SS = TRUE, droplevels = TRUE, stringsAsFactor
   load(system.file("data/metadata.rda", package="soilDB")[1])
   
   # transform variables and metadata
-  d.mapunit <- within(d.mapunit, {
-    farmlndcl = factor(farmlndcl,
-                       levels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceValue"],
-                       labels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceLabel"]
-    )
-    if (stringsAsFactors == FALSE) {
-      farmlndcl = as.character(farmlndcl)
-    }
-    if (droplevels == TRUE & is.factor(farmlndcl)) {
-      farmlndcl = droplevels(farmlndcl)
-    }
-  })
+  # d.mapunit <- within(d.mapunit, {
+  #   farmlndcl = factor(farmlndcl,
+  #                      levels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceValue"],
+  #                      labels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceLabel"]
+  #   )
+  #   if (stringsAsFactors == FALSE) {
+  #     farmlndcl = as.character(farmlndcl)
+  #   }
+  #   if (droplevels == TRUE & is.factor(farmlndcl)) {
+  #     farmlndcl = droplevels(farmlndcl)
+  #   }
+  # })
   
   # cache original column names
   orig_names <- names(d.mapunit)
