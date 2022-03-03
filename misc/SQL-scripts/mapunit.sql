@@ -57,3 +57,4 @@ FROM   area a
 WHERE  areatypename IN ( 'Non-MLRA Soil Survey Area', 'MLRA Soil Survey Area' )
 ORDER  BY areasymbol,
           musym;
+		  

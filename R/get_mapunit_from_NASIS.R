@@ -13,7 +13,7 @@
 #' @export
 get_mapunit_from_NASIS <- function(SS = TRUE, droplevels = TRUE, stringsAsFactors = default.stringsAsFactors(), dsn = NULL) {
  
- q.mapunit = soilDB:::q.lst$mapunit
+ q.mapunit = soilDB:::qmeta_lst$mapunit
   
   # toggle selected set vs. local DB
   if (SS == FALSE) {
@@ -39,21 +39,22 @@ get_mapunit_from_NASIS <- function(SS = TRUE, droplevels = TRUE, stringsAsFactor
   metadata <- NULL
   
   # load local copy of metadata
-  load(system.file("data/metadata.rda", package="soilDB")[1])
+  metadata = soilDB:::qmeta_lst$metadata
+  #load(system.file("data/metadata.rda", package="soilDB")[1])
   
   # transform variables and metadata
-  # d.mapunit <- within(d.mapunit, {
-  #   farmlndcl = factor(farmlndcl,
-  #                      levels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceValue"],
-  #                      labels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceLabel"]
-  #   )
-  #   if (stringsAsFactors == FALSE) {
-  #     farmlndcl = as.character(farmlndcl)
-  #   }
-  #   if (droplevels == TRUE & is.factor(farmlndcl)) {
-  #     farmlndcl = droplevels(farmlndcl)
-  #   }
-  # })
+  d.mapunit <- within(d.mapunit, {
+    farmlndcl = factor(farmlndcl,
+                       levels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceValue"],
+                       labels = metadata[metadata$ColumnPhysicalName == "farmlndcl", "ChoiceLabel"]
+    )
+    if (stringsAsFactors == FALSE) {
+      farmlndcl = as.character(farmlndcl)
+    }
+    if (droplevels == TRUE & is.factor(farmlndcl)) {
+      farmlndcl = droplevels(farmlndcl)
+    }
+  })
   
   # cache original column names
   orig_names <- names(d.mapunit)
@@ -62,7 +63,6 @@ get_mapunit_from_NASIS <- function(SS = TRUE, droplevels = TRUE, stringsAsFactor
   # done
   return(d.mapunit)
 }
-
 
 #' @export
 #' @rdname get_mapunit_from_NASIS

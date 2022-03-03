@@ -1,4 +1,4 @@
-# internal method for opening a connection to local nasis database using credentials
+# internal method for opening a connection to local NASIS database using credentials
 
 .openNASISchannel <- function(dsn = NULL) {
 
